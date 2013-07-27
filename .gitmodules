@@ -1,0 +1,6 @@
+[submodule "blank"]
+	path = blank
+	url = git@github.com:sfeteamcity/empty.git
+[submodule "hg-prompt"]
+	path = hg-prompt
+	url = ./hg-prompt
