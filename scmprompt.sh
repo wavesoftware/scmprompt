@@ -1,6 +1,8 @@
+SELF=$(readlink -f ${BASH_SOURCE[0]})
+
 if [ "x$__GIT_PROMPT_DIR" == "x" ]
 then
-  __GIT_PROMPT_DIR=~/.bash
+  __GIT_PROMPT_DIR=$(dirname $SELF)
 fi
 
 # Colors
