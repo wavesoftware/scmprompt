@@ -7,19 +7,29 @@ from __future__ import print_function
 symbols = {'ahead of': '↑·', 'behind': '↓·', 'prehash':':'}
 
 from subprocess import Popen, PIPE
-
+from os.path import expanduser
 import sys
 import os.path
 
+home = expanduser("~")
 lib_dir = os.path.dirname(sys.argv[0])
 current_dir = os.path.realpath(os.path.curdir)
 
-def get_distance(dir):
-    return 0
+def get_distance(search, actual_dir):
+    distance = 0
+    path = os.path.join(actual_dir, search)
+    if os.path.exists(path):
+        return 0
+    while actual_dir != os.path.dirname(actual_dir):
+        actual_dir = os.path.dirname(actual_dir)
+        distance += 1
+        if os.path.exists(path):
+            return distance
+    return -1
 def get_distance_git():
-    return get_distance('.git')
+    return get_distance('.git', current_dir + '')
 def get_distance_hg():
-    return get_distance('.hg')
+    return get_distance('.hg', current_dir + '')
 def get_git():
     gitsym = Popen(['git', 'symbolic-ref', 'HEAD'], stdout=PIPE, stderr=PIPE)
     branch, error = gitsym.communicate()
@@ -94,7 +104,10 @@ def get_git():
     return out
 def get_hg():
     hgprompt = os.path.join(lib_dir, 'hg-prompt', 'prompt.py')
-    hg_rev, hg_branch = Popen('hg id -b -n', stdout=PIPE, shell=True).communicate()[0].strip().split(" ")
+    hg_rev, error = Popen('hg id -b -n', stdout=PIPE, stderr=PIPE, shell=True).communicate()
+    if error:
+        return None
+    hg_rev, hg_branch = hg_rev.strip().split(" ")
     hg_rev = hg_rev.replace('+', '←').strip('←')
     try:
         hg_rev = int(hg_rev)
@@ -127,8 +140,23 @@ def get_hg():
         hg_counts['M'] -= hg_counts['X']
     ahead = 0
     behind = 0
-    hg_status = 'hg --config extensions.prompt=%s prompt \'{incoming|count},{outgoing|count}\'' % hgprompt
-    hg_status = Popen(hg_status, stdout=PIPE, shell=True).communicate()[0].strip().split(",")
+    hgrc_filename = os.path.join(home, '.hgrc')
+    content = None
+    if os.path.isfile(hgrc_filename):
+        org = file(hgrc_filename)
+        content = org.read()
+        org.close()
+    org = file(hgrc_filename, 'a+')
+    org.write("[extensions]\nprompt = %s" % hgprompt)
+    org.close()
+    hg_status = 'hg prompt "{incoming|count},{outgoing|count}"'
+    hg_status = Popen(hg_status, stdout=PIPE, stderr=PIPE, shell=True).communicate()[0].strip().split(",")
+    if content == None:
+        os.unlink(hgrc_filename)
+    else:
+        org = file(hgrc_filename, 'w+')
+        org.write(content)
+        org.close()
     ahead = hg_status[1]
     behind = hg_status[0]
     if ahead == '':
@@ -156,20 +184,18 @@ def get_hg():
     ]
     return out
 
-git = get_git()
-hg = get_hg()
+gint = get_distance_git()
+hint = get_distance_hg()
 out = None
-if git == None and hg == None:
+if gint == -1 and hint == -1:
     sys.exit(0)
-if git == None and hg != None:
-    out = hg
-if git != None and hg == None:
-    out = git        
-if git != None and hg != None:
-    gint = get_distance_git()
-    hint = get_distance_hg()
+if gint == -1 and hint != -1:
+    out = get_hg()
+if gint != -1 and hint == -1:
+    out = get_git()
+if gint != -1 and hint != -1:
     if gint < hint:
-        out = git
+        out = get_git()
     else:
-        out = hg
+        out = get_hg()
 print("\n".join(out))
