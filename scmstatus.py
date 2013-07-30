@@ -23,6 +23,7 @@ def get_distance(search, actual_dir):
     while actual_dir != os.path.dirname(actual_dir):
         actual_dir = os.path.dirname(actual_dir)
         distance += 1
+        path = os.path.join(actual_dir, search)
         if os.path.exists(path):
             return distance
     return -1
