@@ -17,20 +17,22 @@ current_dir = os.path.realpath(os.path.curdir)
 
 def get_distance(search, actual_dir):
     distance = 0
-    path = os.path.join(actual_dir, search)
-    if os.path.exists(path):
-        return 0
-    while actual_dir != os.path.dirname(actual_dir):
+    searched = {}
+    breakin = 0
+    for i in search:
+        searched[i] = -1
+    for i in search:
+        path = os.path.join(actual_dir, i)
+        if os.path.exists(path):
+            searched[i] = 0
+    while breakin < len(search) and actual_dir != os.path.dirname(actual_dir):
         actual_dir = os.path.dirname(actual_dir)
         distance += 1
-        path = os.path.join(actual_dir, search)
+        path = os.path.join(actual_dir, i)
         if os.path.exists(path):
-            return distance
-    return -1
-def get_distance_git():
-    return get_distance('.git', current_dir + '')
-def get_distance_hg():
-    return get_distance('.hg', current_dir + '')
+            searched[i] = distance
+            breakin += 1
+    return searched
 def get_git():
     gitsym = Popen(['git', 'symbolic-ref', 'HEAD'], stdout=PIPE, stderr=PIPE)
     branch, error = gitsym.communicate()
@@ -185,8 +187,11 @@ def get_hg():
     ]
     return out
 
-gint = get_distance_git()
-hint = get_distance_hg()
+gitpath = os.path.join('.git', 'refs', 'heads')
+hgpath = os.path.join('.hg', 'dirstate')
+ints = get_distance((gitpath, hgpath), current_dir + '')
+gint = ints[gitpath]
+hint = ints[hgpath]
 out = None
 if gint == -1 and hint == -1:
     sys.exit(0)
