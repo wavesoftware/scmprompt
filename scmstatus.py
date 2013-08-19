@@ -187,7 +187,7 @@ def get_hg():
     ]
     return out
 
-gitpath = os.path.join('.git', 'refs', 'heads')
+gitpath = os.path.join('.git')
 hgpath = os.path.join('.hg', 'dirstate')
 ints = get_distance((gitpath, hgpath), current_dir + '')
 gint = ints[gitpath]
