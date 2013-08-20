@@ -28,10 +28,11 @@ def get_distance(search, actual_dir):
     while breakin < len(search) and actual_dir != os.path.dirname(actual_dir):
         actual_dir = os.path.dirname(actual_dir)
         distance += 1
-        path = os.path.join(actual_dir, i)
-        if os.path.exists(path):
-            searched[i] = distance
-            breakin += 1
+        for i in search:
+            path = os.path.join(actual_dir, i)
+            if os.path.exists(path):
+                searched[i] = distance
+                breakin += 1
     return searched
 def get_git():
     gitsym = Popen(['git', 'symbolic-ref', 'HEAD'], stdout=PIPE, stderr=PIPE)
