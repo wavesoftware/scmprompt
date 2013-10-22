@@ -161,8 +161,12 @@ def get_hg():
         org = file(hgrc_filename, 'w+')
         org.write(content)
         org.close()
-    ahead = hg_status[1]
-    behind = hg_status[0]
+    if len(hg_status) != 2:
+        ahead = 0
+        behind = 0
+    else:
+        ahead = hg_status[1]
+        behind = hg_status[0]
     if ahead == '':
         ahead = 0
     if behind == '':
