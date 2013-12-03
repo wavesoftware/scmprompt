@@ -1,3 +1,0 @@
-[submodule "hg-prompt"]
-	path = hg-prompt
-	url = hg::http://bitbucket.org/sjl/hg-prompt

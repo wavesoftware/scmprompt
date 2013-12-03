@@ -10,6 +10,8 @@ Features
 
 - Support for GIT
 - Support for Mercurial
+- Pull and Push indicator
+- New, Added, Modificated and Conflicts indicators
 - Time on each command
 - Return code of last command
 - Full path to current working directory
@@ -18,15 +20,26 @@ Features
 Instalation
 -----------
 
-1. Locate `git-remote-hg` script and ensure is executable path. For example, Ubuntu:
-    1. Locate: `dpkg -L git | grep contrib | grep git-remote-hg`
-    2. If not found, download from GitHub: `https://github.com/git/git/blob/master/contrib/remote-helpers/git-remote-hg`
-    3. Make execable: `sudo chmod +x <path_to_git_remote_hg>/git-remote-hg`
-    4. Link to bin directory: `sudo ln -s <path_to_git_remote_hg>/git-remote-hg /usr/local/bin/git-remote-hg`
-2. Create `.bash` directory: `mkdir -p ~/.bash`
-3. `cd ~/.bash`
+1. Create `.bash` directory: `mkdir -p ~/.bash`
+2. `cd ~/.bash`
 3. Clone this repository: `git clone https://github.com/wavesoftware/scmprompt.git scmprompt`
-4. `cd scmprompt`
-5. `git submodule init`
-6. `git submodule update`
-7. `echo '. ~/.bash/scmprompt/scmprompt.sh' >> ~/.bashrc`
+4. Install into your Bash RC: `echo '. ~/.bash/scmprompt/scmprompt.sh' >> ~/.bashrc`
+
+Copy & Paste install
+--------------------
+
+```bash
+mkdir -p ~/.bash
+cd ~/.bash
+git clone https://github.com/wavesoftware/scmprompt.git scmprompt
+echo '. ~/.bash/scmprompt/scmprompt.sh' >> ~/.bashrc
+```
+
+Update to newest version
+------------------------
+
+```bash
+cd ~/.bash/scmprompt
+git pull
+```
+

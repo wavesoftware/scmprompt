@@ -15,6 +15,9 @@ home = expanduser("~")
 lib_dir = os.path.dirname(sys.argv[0])
 current_dir = os.path.realpath(os.path.curdir)
 
+def debug(label, obj):
+    sys.stderr.write("Debug[%s]: %s\n" % (label, repr(obj)))
+
 def get_distance(search, actual_dir):
     distance = 0
     searched = {}
@@ -107,9 +110,9 @@ def get_git():
     ]
     return out
 def get_hg():
-    hgprompt = os.path.join(lib_dir, 'hg-prompt', 'prompt.py')
     hg_rev, error = Popen('hg id -b -n', stdout=PIPE, stderr=PIPE, shell=True).communicate()
     if error:
+        error('error@115', error)
         return None
     hg_rev, hg_branch = hg_rev.strip().split(" ")
     hg_rev = hg_rev.replace('+', '←').strip('←')
@@ -142,35 +145,18 @@ def get_hg():
     
     if (hg_counts['X']) > 0:
         hg_counts['M'] -= hg_counts['X']
-    ahead = 0
-    behind = 0
-    hgrc_filename = os.path.join(home, '.hgrc')
-    content = None
-    if os.path.isfile(hgrc_filename):
-        org = file(hgrc_filename)
-        content = org.read()
-        org.close()
-    org = file(hgrc_filename, 'a+')
-    org.write("[extensions]\nprompt = %s" % hgprompt)
-    org.close()
-    hg_status = 'hg prompt "{incoming|count},{outgoing|count}"'
-    hg_status = Popen(hg_status, stdout=PIPE, stderr=PIPE, shell=True).communicate()[0].strip().split(",")
-    if content == None:
-        os.unlink(hgrc_filename)
-    else:
-        org = file(hgrc_filename, 'w+')
-        org.write(content)
-        org.close()
-    if len(hg_status) != 2:
+    ahead, error = Popen('hg phase -r 0::tip | grep "draft" | wc -l', stdout=PIPE, stderr=PIPE, shell=True).communicate()
+    if error:
+        error('error@151', error)
         ahead = 0
+    else:
+        ahead = int(ahead)
+    behind, error = Popen('hg log -r %s::%s -b %s | grep changeset | wc -l' % (hg_rev, hg_branch, hg_branch), stdout=PIPE, stderr=PIPE, shell=True).communicate()
+    if error:
+        error('error@156', error)
         behind = 0
     else:
-        ahead = hg_status[1]
-        behind = hg_status[0]
-    if ahead == '':
-        ahead = 0
-    if behind == '':
-        behind = 0
+        behind = int(behind) - 1
     remote = ''
     if behind:
         remote += '%s%s' % (symbols['behind'], behind)
@@ -179,7 +165,6 @@ def get_hg():
 
     if remote == "":
         remote = '.'
-    
     out = [
         'hg',
         '%s:%s' % (hg_branch, hg_rev),
@@ -209,4 +194,6 @@ if gint != -1 and hint != -1:
         out = get_git()
     else:
         out = get_hg()
+if not out:
+    out = []
 print("\n".join(out))
