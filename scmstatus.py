@@ -10,13 +10,18 @@ from subprocess import Popen, PIPE
 from os.path import expanduser
 import sys
 import os.path
+import os
 
+is_debugging = os.getenv('SCMPROMPT_DEBUG', 'false') == 'true'
 home = expanduser("~")
 lib_dir = os.path.dirname(sys.argv[0])
 current_dir = os.path.realpath(os.path.curdir)
 
-def debug(label, obj):
-    sys.stderr.write("Debug[%s]: %s\n" % (label, repr(obj)))
+def debuglog(label, obj):
+    if is_debugging:
+        sys.stderr.write("Debug[%s]: %s\n" % (label, repr(obj)))
+def errorlog(label, obj):
+    sys.stderr.write("Error[%s]: %s\n" % (label, repr(obj)))
 
 def get_distance(search, actual_dir):
     distance = 0
@@ -112,9 +117,10 @@ def get_git():
 def get_hg():
     hg_rev, error = Popen('hg id -b -n', stdout=PIPE, stderr=PIPE, shell=True).communicate()
     if error:
-        error('error@115', error)
+        errorlog('error@115', error)
         return None
     hg_rev, hg_branch = hg_rev.strip().split(" ")
+    debuglog('branch', hg_branch)
     hg_rev = hg_rev.replace('+', '←').strip('←')
     try:
         hg_rev = int(hg_rev)
@@ -147,13 +153,15 @@ def get_hg():
         hg_counts['M'] -= hg_counts['X']
     ahead, error = Popen('hg phase -r 0::tip | grep "draft" | wc -l', stdout=PIPE, stderr=PIPE, shell=True).communicate()
     if error:
-        error('error@151', error)
+        errorlog('error@151', error)
         ahead = 0
     else:
         ahead = int(ahead)
-    behind, error = Popen('hg log -r %s::%s -b %s | grep changeset | wc -l' % (hg_rev, hg_branch, hg_branch), stdout=PIPE, stderr=PIPE, shell=True).communicate()
+    cmdline = 'hg log -r \'%s::branch("%s")\' -b \'%s\' | grep changeset | wc -l' % (hg_rev, hg_branch, hg_branch)
+    debuglog('hg behind cmdline', cmdline)
+    behind, error = Popen(cmdline, stdout=PIPE, stderr=PIPE, shell=True).communicate()
     if error:
-        error('error@156', error)
+        errorlog('error@156', error)
         behind = 0
     else:
         behind = int(behind) - 1
