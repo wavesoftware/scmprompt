@@ -5,43 +5,6 @@ then
   __SCM_PROMPT_DIR=$(dirname $SELF)
 fi
 
-# Colors
-# Reset
-ResetColor="\[\033[0m\]"       # Text Reset
-
-# Regular Colors
-Red="\[\033[0;31m\]"          # Red
-Yellow="\[\033[0;33m\]"       # Yellow
-Blue="\[\033[0;34m\]"         # Blue
-WHITE='\[\033[37m\]'
-
-# Bold
-BGreen="\[\033[1;32m\]"       # Green
-
-# High Intensty
-IBlack="\[\033[0;90m\]"       # Black
-
-# Bold High Intensty
-Magenta="\[\033[1;95m\]"     # Purple
-
-# Various variables you might want for your PS1 prompt instead
-Time12a="\@"
-PathShort="\w"
-Hostname="\H"
-Username="\u"
-
-# Default values for the appearance of the prompt. Configure at will.
-SCM_PROMPT_PREFIX="["
-SCM_PROMPT_SUFFIX="]"
-SCM_PROMPT_SEPARATOR="|"
-SCM_PROMPT_BRANCH="${Magenta}"
-SCM_PROMPT_STAGED="${Red}● "
-SCM_PROMPT_CONFLICTS="${Red}✖ "
-SCM_PROMPT_CHANGED="${Blue}✚ "
-SCM_PROMPT_REMOTE=" "
-SCM_PROMPT_UNTRACKED="…"
-SCM_PROMPT_CLEAN="${BGreen}✔"
-
 function update_current_SCM_vars() {
     unset __CURRENT_SCM_STATUS
     local scmstatus="${__SCM_PROMPT_DIR}/scmstatus.py"
@@ -62,15 +25,51 @@ function update_current_SCM_vars() {
 }
 
 function setScmPrompt() {
-    exit_code=$?
+    local exit_code=$?
+    # Colors
+	# Reset
+	local ResetColor="\[\033[0m\]"       # Text Reset
+
+	# Regular Colors
+	local Red="\[\033[0;31m\]"          # Red
+	local Yellow="\[\033[0;33m\]"       # Yellow
+	local Blue="\[\033[0;34m\]"         # Blue
+	local WHITE='\[\033[37m\]'
+
+	# Bold
+	local BGreen="\[\033[1;32m\]"       # Green
+
+	# High Intensty
+	local IBlack="\[\033[0;90m\]"       # Black
+
+	# Bold High Intensty
+	local Magenta="\[\033[1;95m\]"     # Purple
+
+	# Various variables you might want for your PS1 prompt instead
+	local Time12a="\@"
+	local PathShort="\w"
+	local Hostname="\H"
+	local Username="\u"
+
+	# Default values for the appearance of the prompt. Configure at will.
+	local SCM_PROMPT_PREFIX="["
+	local SCM_PROMPT_SUFFIX="]"
+	local SCM_PROMPT_SEPARATOR="|"
+	local SCM_PROMPT_BRANCH="${Magenta}"
+	local SCM_PROMPT_STAGED="${Red}● "
+	local SCM_PROMPT_CONFLICTS="${Red}✖ "
+	local SCM_PROMPT_CHANGED="${Blue}✚ "
+	local SCM_PROMPT_REMOTE=" "
+	local SCM_PROMPT_UNTRACKED="…"
+	local SCM_PROMPT_CLEAN="${BGreen}✔"
     unset PROMPT_START
     unset PROMPT_END
     if [[ $EUID -ne 0 ]]; then
-        USER="$BGreen$Username$ResetColor"
+        local _USER="$BGreen$Username$ResetColor"
     else
-        USER="$Red$Username$ResetColor"
+        local _USER="$Red$Username$ResetColor"
     fi
-    PROMPT_START="$USER@$Yellow$Hostname $Blue$PathShort$ResetColor"
+    PROMPT_START="$_USER@$Yellow$Hostname $Blue$PathShort$ResetColor"
     PROMPT_END=" $WHITE$Time12a$ResetColor\\$ "
 
     if [ $exit_code -eq 0 ]; then
