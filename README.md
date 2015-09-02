@@ -30,16 +30,25 @@ Copy & Paste install
 
 ```bash
 mkdir -p ~/.bash
-cd ~/.bash
-git clone https://github.com/wavesoftware/scmprompt.git scmprompt
+git clone https://github.com/wavesoftware/scmprompt.git ~/.bash/scmprompt
 echo '. ~/.bash/scmprompt/scmprompt.sh' >> ~/.bashrc
+exec bash -l
+```
+
+Copy & Paste install for all users
+----------------------------------
+
+```bash
+sudo git clone https://github.com/wavesoftware/scmprompt.git /usr/lib/scmprompt
+sudo bash -c "echo '. /usr/lib/scmprompt/scmprompt.sh' > /etc/profile.d/scmprompt.sh"
+exec bash -l
 ```
 
 Update to newest version
 ------------------------
 
 ```bash
-cd ~/.bash/scmprompt
+cd <scmprompt-dir>
 git pull
 ```
 
